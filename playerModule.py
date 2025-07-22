@@ -1,4 +1,7 @@
 class gamePlayer:
 
     def __init__(self):
-        self.face = ":3"
+        self.hand = []
+
+    def pullACard(self,cardClass):
+        self.hand.append(cardClass.pullACard())

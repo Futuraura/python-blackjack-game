@@ -8,12 +8,23 @@ class cardDeck:
         for suit in suits:
             for value in range(1, 14):
                 self.cards.append([suit,value])
-
+    
     def shuffleCards(self):
         numpy.random.shuffle(self.cards)
 
     def pullACard(self):
         return self.cards.pop()
+
+    def printAHand(self,hand):
+        visualHand = ["","","","","","","","",""]
+        for x in hand:
+            currentCard = self.getCardSuite(x)
+            tempCardArray = currentCard.split("\n")
+            counter = 0
+            for y in tempCardArray:
+                visualHand[counter] += y+" "
+                counter+=1
+        return "\n".join(visualHand)
 
     def getCardSuite(self, card):
         """
@@ -23,7 +34,7 @@ class cardDeck:
         |K        |
         |♠        |
         |         |
-        |    :)   |
+        |   >:D   |
         |         |
         |        ♠|
         |        K|
@@ -43,26 +54,22 @@ class cardDeck:
                 asciiSuit = "♦"
 
         if len(str(rank))>=2:
-            return f"""
-._________.
+            return f"""._________.
 |{rank}       |
 |{asciiSuit}        |
 |         |
-|    :)   |
+|   >:D   |
 |         |
 |        {asciiSuit}|
 |       {rank}|
-˙‾‾‾‾‾‾‾‾‾˙
-        """
+˙‾‾‾‾‾‾‾‾‾˙"""
         else:
-            return f"""
-._________.
+            return f"""._________.
 |{rank}        |
 |{asciiSuit}        |
 |         |
-|    :)   |
+|   >:D   |
 |         |
 |        {asciiSuit}|
 |        {rank}|
-˙‾‾‾‾‾‾‾‾‾˙
-            """
+˙‾‾‾‾‾‾‾‾‾˙"""
