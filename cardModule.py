@@ -5,18 +5,19 @@ class cardDeck:
     def __init__(self):
         self.cards = []
         suits = ['h', 'd', 'c', 's'] # Hearts, Diamonds, Clubs, Spades
+        possibleFakeValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
         for suit in suits:
             for value in range(1, 14):
-                self.cards.append([suit,value])
+                self.cards.append([
+                    {
+                        "suit": suit,
+                        "fakeValue": possibleFakeValues[value-1]
+                    },
+                    min(value,10)
+                    ])
     
     def shuffleCards(self):
         numpy.random.shuffle(self.cards)
-
-    def packTheCards(self):
-        self.__init__()
-
-    def pullACard(self):
-        return self.cards.pop()
 
     def printAHand(self,hand):
         visualHand = ["","","","","","","","",""]
@@ -46,8 +47,8 @@ class cardDeck:
 
         emblem = ">:D"
 
-        suit = card[0]
-        rank = card[1]
+        suit = card[0]["suit"]
+        rank = card[0]["fakeValue"]
         match suit:
             case "h":
                 asciiSuit = "♥"
