@@ -1,3 +1,5 @@
+import numpy
+
 class cardDeck:
 
     def __init__(self):
@@ -6,6 +8,12 @@ class cardDeck:
         for suit in suits:
             for value in range(1, 14):
                 self.cards.append([suit,value])
+
+    def shuffleCards(self):
+        numpy.random.shuffle(self.cards)
+
+    def pullACard(self):
+        return self.cards.pop()
 
     def getCardSuite(self, card):
         """
