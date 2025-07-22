@@ -12,6 +12,9 @@ class cardDeck:
     def shuffleCards(self):
         numpy.random.shuffle(self.cards)
 
+    def packTheCards(self):
+        self.__init__()
+
     def pullACard(self):
         return self.cards.pop()
 
@@ -41,6 +44,8 @@ class cardDeck:
         ˙‾‾‾‾‾‾‾‾‾˙
         """
 
+        emblem = ">:D"
+
         suit = card[0]
         rank = card[1]
         match suit:
@@ -53,23 +58,12 @@ class cardDeck:
             case "d":
                 asciiSuit = "♦"
 
-        if len(str(rank))>=2:
-            return f"""._________.
-|{rank}       |
-|{asciiSuit}        |
+        return f"""._________.
+|{asciiSuit+" "+str(rank):<9}|
 |         |
-|   >:D   |
 |         |
-|        {asciiSuit}|
-|       {rank}|
-˙‾‾‾‾‾‾‾‾‾˙"""
-        else:
-            return f"""._________.
-|{rank}        |
-|{asciiSuit}        |
+|{emblem:^9}|
 |         |
-|   >:D   |
 |         |
-|        {asciiSuit}|
-|        {rank}|
+|{str(rank)+" "+asciiSuit:>9}|
 ˙‾‾‾‾‾‾‾‾‾˙"""
