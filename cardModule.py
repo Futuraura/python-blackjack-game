@@ -19,10 +19,13 @@ class cardDeck:
     def shuffleCards(self):
         numpy.random.shuffle(self.cards)
 
-    def printAHand(self,hand):
+    def printAHand(self,hand,isDealer=False):
         visualHand = ["","","","","","","","",""]
-        for x in hand:
-            currentCard = self.getCardSuite(x)
+        for i, x in enumerate(hand):
+            if isDealer and i == 0:
+                currentCard = self.getCardSuite(x,True)
+            else:
+                currentCard = self.getCardSuite(x)
             tempCardArray = currentCard.split("\n")
             counter = 0
             for y in tempCardArray:
@@ -30,7 +33,7 @@ class cardDeck:
                 counter+=1
         return "\n".join(visualHand)
 
-    def getCardSuite(self, card):
+    def getCardSuite(self, card, shouldHideCard=False):
         """
         For now I'll use this pattern:
         ♠ ♥ ♣ ♦
@@ -46,18 +49,22 @@ class cardDeck:
         """
 
         emblem = ">:D"
-
-        suit = card[0]["suit"]
-        rank = card[0]["fakeValue"]
-        match suit:
-            case "h":
-                asciiSuit = "♥"
-            case "s":
-                asciiSuit = "♠"
-            case "c":
-                asciiSuit = "♣"
-            case "d":
-                asciiSuit = "♦"
+        
+        if shouldHideCard:
+            asciiSuit = "XX"
+            rank = "XX"
+        else:
+            suit = card[0]["suit"]
+            rank = card[0]["fakeValue"]
+            match suit:
+                case "h":
+                    asciiSuit = "♥"
+                case "s":
+                    asciiSuit = "♠"
+                case "c":
+                    asciiSuit = "♣"
+                case "d":
+                    asciiSuit = "♦"
 
         return f"""._________.
 |{asciiSuit+" "+str(rank):<9}|

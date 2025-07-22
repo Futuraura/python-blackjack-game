@@ -66,18 +66,29 @@ class blackjackGame:
         else:
             return True
 
-    def countHand(self,hand):
+    def countHand(self,hand,isDealer=False):
         total = 0
-        for x in hand:
-            total += x[1]
+        if len(hand)==2 and isDealer:
+            total = hand[1][1]
+        else:
+            for x in hand:
+                total += x[1]
         return total
     
-    def gameSituation(self):
-        return f"""Player's Hand [{self.countHand(self.player.hand)}]
+    def gameSituation(self,isEndMessage=False):
+        if isEndMessage:
+            return f"""Player's Hand [{self.countHand(self.player.hand)}]
 {self.deckOCards.printAHand(self.player.hand)}
 
 Dealer's Hand [{self.countHand(self.dealer.hand)}]
 {self.deckOCards.printAHand(self.dealer.hand)}
+"""
+        else:
+            return f"""Player's Hand [{self.countHand(self.player.hand)}]
+{self.deckOCards.printAHand(self.player.hand)}
+
+Dealer's Hand [{self.countHand(self.dealer.hand,True)}]
+{self.deckOCards.printAHand(self.dealer.hand,True)}
 """
 
     def endGame(self):
@@ -85,12 +96,12 @@ Dealer's Hand [{self.countHand(self.dealer.hand)}]
         playerTotal = self.countHand(self.player.hand)
 
         if self.isBusted(self.player.hand):
-            return f'{self.gameSituation()}\n--------------\nPlayer busted, game lost\n'
+            return f'{self.gameSituation(True)}\n--------------\nPlayer busted, game lost\n'
         elif self.isBusted(self.dealer.hand):
-            return f'{self.gameSituation()}\n--------------\nDealer busted, game won\n'
+            return f'{self.gameSituation(True)}\n--------------\nDealer busted, game won\n'
         elif playerTotal > dealerTotal:
-            return f'{self.gameSituation()}\n--------------\nPlayer won!\n'
+            return f'{self.gameSituation(True)}\n--------------\nPlayer won!\n'
         elif dealerTotal > playerTotal:
-            return f'{self.gameSituation()}\n--------------\nDealer won!\n'
+            return f'{self.gameSituation(True)}\n--------------\nDealer won!\n'
         elif dealerTotal == playerTotal:
-            return f'{self.gameSituation()}\n--------------\nGame tied!\n'
+            return f'{self.gameSituation(True)}\n--------------\nGame tied!\n'
