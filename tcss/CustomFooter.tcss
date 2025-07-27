@@ -1,0 +1,18 @@
+CustomFooter {
+    dock: bottom;
+    height: 1;
+    background: $panel;
+    color: $foreground;
+    
+    #footer-container {
+        height: 1;
+        align: center middle;
+    }
+
+    #textDisplay {
+        color: #fff;
+        text-style: bold;
+        margin: 0 2;
+        width: auto;
+    }
+}

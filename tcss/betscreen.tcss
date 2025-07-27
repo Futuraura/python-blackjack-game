@@ -1,0 +1,34 @@
+BetScreen{
+    align: center middle;
+    background: $surface;
+
+    Input, Static {
+        width: auto;
+    }
+
+    Input {
+        min-width: 30;
+        margin: 1 0;
+        background: $panel;
+    }
+
+    Input:hover {
+        background: $primary;
+        color: $panel;
+    }
+
+    Button {
+        width: 30;
+        height: 3;
+        margin: 1 0;
+        background: $panel;
+        border: $primary;
+        align: center middle;
+        content-align: center middle;
+    }
+
+    Button:hover {
+        background: $primary;
+        color: $background;
+    }
+}
