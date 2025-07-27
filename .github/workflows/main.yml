@@ -5,7 +5,7 @@ on:
     types: [published]
 
 permissions:
-  contents: write  # Needed to upload release assets
+  contents: write
 
 jobs:
   build-windows-exe:
@@ -24,16 +24,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
-          pip install numpy
+          pip install textual
 
       - name: Build EXE
         run: |
-          pyinstaller --onefile blackjack.py
-        # Replace "your_script.py" with your actual entry file
+          pyinstaller blackjack.spec
 
       - name: Upload EXE to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/blackjack.exe
+          files: dist/blackjack/blackjack.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
