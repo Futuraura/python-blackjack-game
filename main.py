@@ -1,12 +1,16 @@
 import subprocess
 import os
+import platform
 
-# Thank god stackoverflow and google still exsist
+# Thank god stackOverflow and google still exist
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-wezterm_path = os.path.join(base_dir, "WezTerm", "wezterm-gui.exe")
 script_path = os.path.join(base_dir, "blackjack.py")
 
-cmd = [wezterm_path,"start","python", script_path]
+if platform.system() == "Windows":
+    wezterm_path = os.path.join(base_dir, "WezTerm", "wezterm-gui.exe")
+    cmd = [wezterm_path, "start", "python", script_path]
+else:
+    cmd = ["python", script_path]
 
 subprocess.Popen(cmd, cwd=base_dir)
