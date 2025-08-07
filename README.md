@@ -9,6 +9,7 @@ Thank you, for writing the commit messages, Claude Sonnet 4! I couldn't have don
 ## Requirements
 
 - Python >=3.12
+- Every python module in requirements.txt
 
 ## Installation
 
