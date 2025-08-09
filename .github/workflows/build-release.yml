@@ -26,13 +26,41 @@ jobs:
           pip install pyinstaller
           pip install -r requirements.txt
 
+      - name: Debug environment
+        run: |
+          Write-Host "Current directory: $(Get-Location)"
+          Write-Host "Files in current directory:"
+          Get-ChildItem
+          Write-Host "Python version:"
+          python --version
+
       - name: Build with PyInstaller
         run: |
-          pyinstaller --clean blackjack_game.spec
+          Write-Host "Building with PyInstaller..."
+          pyinstaller --clean --noconfirm --log-level=DEBUG blackjack_game.spec
+          Write-Host "Build completed. Checking dist folder:"
+          if (Test-Path "dist") {
+            Get-ChildItem dist/
+            if (Test-Path "dist/BlackjackGame") {
+              Write-Host "BlackjackGame folder contents:"
+              Get-ChildItem dist/BlackjackGame/ | Select-Object -First 10
+              Write-Host "Checking for custom files:"
+              Get-ChildItem "dist/BlackjackGame/_internal" | Where-Object {$_.Name -like "*WezTerm*" -or $_.Name -like "*tcss*" -or $_.Name -like "*blackjack*"}
+            } else {
+              Write-Host "ERROR: BlackjackGame folder not found"
+              exit 1
+            }
+          } else {
+            Write-Host "ERROR: dist folder not created"
+            exit 1
+          }
 
       - name: Create release package
         run: |
-          # Create a run script for users
+          if (-not (Test-Path "dist/BlackjackGame/BlackjackGame.exe")) {
+            Write-Host "ERROR: BlackjackGame.exe not found!"
+            exit 1
+          }
           echo '@echo off' > dist/BlackjackGame/run_game.bat
           echo 'title Blackjack Game' >> dist/BlackjackGame/run_game.bat
           echo 'echo Starting Blackjack Game...' >> dist/BlackjackGame/run_game.bat
@@ -40,8 +68,6 @@ jobs:
           echo 'echo.' >> dist/BlackjackGame/run_game.bat
           echo 'echo Game ended. Press any key to close...' >> dist/BlackjackGame/run_game.bat
           echo 'pause >nul' >> dist/BlackjackGame/run_game.bat
-
-          # Create instructions file
           echo 'Blackjack Game - Standalone Version' > dist/BlackjackGame/INSTRUCTIONS.txt
           echo '====================================' >> dist/BlackjackGame/INSTRUCTIONS.txt
           echo '' >> dist/BlackjackGame/INSTRUCTIONS.txt
@@ -52,19 +78,21 @@ jobs:
           echo 'No additional installation required.' >> dist/BlackjackGame/INSTRUCTIONS.txt
           echo '' >> dist/BlackjackGame/INSTRUCTIONS.txt
           echo 'Enjoy the game!' >> dist/BlackjackGame/INSTRUCTIONS.txt
-
-          # Copy README if it exists
           if (Test-Path README.md) { Copy-Item README.md dist/BlackjackGame/ }
 
       - name: Create ZIP archive
         run: |
-          Compress-Archive -Path "dist/BlackjackGame/*" -DestinationPath "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip"
+          Write-Host "Creating ZIP archive..."
+          Compress-Archive -Path "dist/BlackjackGame/*" -DestinationPath "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip" -Force
+          $size = (Get-Item "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip").Length / 1MB
+          Write-Host "ZIP created. Size: $([math]::Round($size, 2)) MB"
 
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip"
+          Write-Host "Uploading release asset..."
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip" --clobber
 
   build-linux:
     runs-on: ubuntu-latest
@@ -86,11 +114,25 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --clean blackjack_game.spec
+          echo "Building with PyInstaller..."
+          pyinstaller --clean --noconfirm --log-level=DEBUG blackjack_game.spec
+          echo "Build completed. Checking dist folder:"
+          ls -la dist/
+          if [ -d "dist/BlackjackGame" ]; then
+            echo "BlackjackGame folder contents:"
+            ls -la dist/BlackjackGame/
+          else
+            echo "ERROR: BlackjackGame folder not found in dist/"
+            exit 1
+          fi
 
       - name: Create release package
         run: |
-          # Create a run script for users
+          if [ ! -f "dist/BlackjackGame/BlackjackGame" ]; then
+            echo "ERROR: BlackjackGame executable not found!"
+            exit 1
+          fi
+
           cat > dist/BlackjackGame/run_game.sh << 'EOF'
           #!/bin/bash
           echo "Starting Blackjack Game..."
@@ -100,7 +142,6 @@ jobs:
           EOF
           chmod +x dist/BlackjackGame/run_game.sh
 
-          # Create instructions file
           cat > dist/BlackjackGame/INSTRUCTIONS.txt << 'EOF'
           Blackjack Game - Standalone Version
           ====================================
@@ -114,19 +155,19 @@ jobs:
           Enjoy the game!
           EOF
 
-          # Copy README if it exists
           [ -f README.md ] && cp README.md dist/BlackjackGame/
 
       - name: Create TAR archive
         run: |
           cd dist
           tar -czf "../BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz" BlackjackGame/
+          echo "TAR created. Size: $(du -h "../BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz" | cut -f1)"
 
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz"
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz" --clobber
 
   build-macos:
     runs-on: macos-latest
@@ -148,11 +189,25 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --clean blackjack_game.spec
+          echo "Building with PyInstaller..."
+          pyinstaller --clean --noconfirm --log-level=DEBUG blackjack_game.spec
+          echo "Build completed. Checking dist folder:"
+          ls -la dist/
+          if [ -d "dist/BlackjackGame" ]; then
+            echo "BlackjackGame folder contents:"
+            ls -la dist/BlackjackGame/
+          else
+            echo "ERROR: BlackjackGame folder not found in dist/"
+            exit 1
+          fi
 
       - name: Create release package
         run: |
-          # Create a run script for users
+          if [ ! -f "dist/BlackjackGame/BlackjackGame" ]; then
+            echo "ERROR: BlackjackGame executable not found!"
+            exit 1
+          fi
+
           cat > dist/BlackjackGame/run_game.sh << 'EOF'
           #!/bin/bash
           echo "Starting Blackjack Game..."
@@ -162,7 +217,6 @@ jobs:
           EOF
           chmod +x dist/BlackjackGame/run_game.sh
 
-          # Create instructions file
           cat > dist/BlackjackGame/INSTRUCTIONS.txt << 'EOF'
           Blackjack Game - Standalone Version
           ====================================
@@ -176,16 +230,16 @@ jobs:
           Enjoy the game!
           EOF
 
-          # Copy README if it exists
           [ -f README.md ] && cp README.md dist/BlackjackGame/
 
       - name: Create ZIP archive
         run: |
           cd dist
           zip -r "../BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip" BlackjackGame/
+          echo "ZIP created. Size: $(du -h "../BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip" | cut -f1)"
 
       - name: Upload release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip"
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip" --clobber
