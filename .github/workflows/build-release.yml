@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -58,14 +61,10 @@ jobs:
           Compress-Archive -Path "dist/BlackjackGame/*" -DestinationPath "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip"
 
       - name: Upload release asset
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip
-          asset_name: BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip"
 
   build-linux:
     runs-on: ubuntu-latest
@@ -124,14 +123,10 @@ jobs:
           tar -czf "../BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz" BlackjackGame/
 
       - name: Upload release asset
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz
-          asset_name: BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz
-          asset_content_type: application/gzip
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz"
 
   build-macos:
     runs-on: macos-latest
@@ -190,11 +185,7 @@ jobs:
           zip -r "../BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip" BlackjackGame/
 
       - name: Upload release asset
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip
-          asset_name: BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip
-          asset_content_type: application/zip
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} "BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip"
