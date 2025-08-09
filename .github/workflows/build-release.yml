@@ -1,0 +1,200 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean blackjack_game.spec
+
+      - name: Create release package
+        run: |
+          # Create a run script for users
+          echo '@echo off' > dist/BlackjackGame/run_game.bat
+          echo 'title Blackjack Game' >> dist/BlackjackGame/run_game.bat
+          echo 'echo Starting Blackjack Game...' >> dist/BlackjackGame/run_game.bat
+          echo 'BlackjackGame.exe' >> dist/BlackjackGame/run_game.bat
+          echo 'echo.' >> dist/BlackjackGame/run_game.bat
+          echo 'echo Game ended. Press any key to close...' >> dist/BlackjackGame/run_game.bat
+          echo 'pause >nul' >> dist/BlackjackGame/run_game.bat
+
+          # Create instructions file
+          echo 'Blackjack Game - Standalone Version' > dist/BlackjackGame/INSTRUCTIONS.txt
+          echo '====================================' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo '' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo 'How to run:' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo '- Double-click "run_game.bat" or "BlackjackGame.exe"' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo '' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo 'All game files and dependencies are included.' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo 'No additional installation required.' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo '' >> dist/BlackjackGame/INSTRUCTIONS.txt
+          echo 'Enjoy the game!' >> dist/BlackjackGame/INSTRUCTIONS.txt
+
+          # Copy README if it exists
+          if (Test-Path README.md) { Copy-Item README.md dist/BlackjackGame/ }
+
+      - name: Create ZIP archive
+        run: |
+          Compress-Archive -Path "dist/BlackjackGame/*" -DestinationPath "BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip"
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip
+          asset_name: BlackjackGame-Windows-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean blackjack_game.spec
+
+      - name: Create release package
+        run: |
+          # Create a run script for users
+          cat > dist/BlackjackGame/run_game.sh << 'EOF'
+          #!/bin/bash
+          echo "Starting Blackjack Game..."
+          ./BlackjackGame
+          echo "Game ended. Press Enter to close..."
+          read
+          EOF
+          chmod +x dist/BlackjackGame/run_game.sh
+
+          # Create instructions file
+          cat > dist/BlackjackGame/INSTRUCTIONS.txt << 'EOF'
+          Blackjack Game - Standalone Version
+          ====================================
+
+          How to run:
+          - Run "./run_game.sh" in terminal or "./BlackjackGame"
+
+          All game files and dependencies are included.
+          No additional installation required.
+
+          Enjoy the game!
+          EOF
+
+          # Copy README if it exists
+          [ -f README.md ] && cp README.md dist/BlackjackGame/
+
+      - name: Create TAR archive
+        run: |
+          cd dist
+          tar -czf "../BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz" BlackjackGame/
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz
+          asset_name: BlackjackGame-Linux-${{ github.event.release.tag_name }}.tar.gz
+          asset_content_type: application/gzip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --clean blackjack_game.spec
+
+      - name: Create release package
+        run: |
+          # Create a run script for users
+          cat > dist/BlackjackGame/run_game.sh << 'EOF'
+          #!/bin/bash
+          echo "Starting Blackjack Game..."
+          ./BlackjackGame
+          echo "Game ended. Press Enter to close..."
+          read
+          EOF
+          chmod +x dist/BlackjackGame/run_game.sh
+
+          # Create instructions file
+          cat > dist/BlackjackGame/INSTRUCTIONS.txt << 'EOF'
+          Blackjack Game - Standalone Version
+          ====================================
+
+          How to run:
+          - Run "./run_game.sh" in terminal or "./BlackjackGame"
+
+          All game files and dependencies are included.
+          No additional installation required.
+
+          Enjoy the game!
+          EOF
+
+          # Copy README if it exists
+          [ -f README.md ] && cp README.md dist/BlackjackGame/
+
+      - name: Create ZIP archive
+        run: |
+          cd dist
+          zip -r "../BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip" BlackjackGame/
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip
+          asset_name: BlackjackGame-macOS-${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip
